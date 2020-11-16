@@ -1,62 +1,51 @@
-![ntop][ntopng_logo] ![ntop][ntop_logo]
-# nDPI
+# Tracker analysis
 
-[![Build Status](https://travis-ci.org/ntop/nDPI.png?branch=dev)](https://travis-ci.org/ntop/nDPI)
+Progetto realizzato per il corso di Gestione di reti. Lo scopo del progetto è analizzare il traffico di una rete per visualizzare i collegamenti ai
+domini che effettuano attività di tracking, mostrando statistiche che aiutano a comprendere la portata del fenomeno. Ho scelto la libreria open source di deep packet inspection nDPI, aggiungendo la funzionalità a ndpiReader.
 
-## What is nDPI ?
+L’argomento -a <nomefile> (o –tracking <nomefile>) accetta in input una lista di domini, uno per riga, che viene utilizzata per il riconoscimento del traffico. Il file script.sh genera una lista adatta allo scopo.
 
-nDPI is an open source LGPLv3 library for deep-packet inspection. Based on OpenDPI it includes ntop extensions. We have tried to push them into the OpenDPI source tree but nobody answered emails so we have decided to create our own source tree
+## Esempio di esecuzione
+```
+./script.sh list
+./ndpiReader --tracking list -i eth0
+```
+Segue il risultato dell’esecuzione durante una visita alla home page del sito d’informazione repubblica.it
+```
+Tracking and Advertising Stats: 
+       accounts.us1.gigya.com                   packets: 26            bytes: 8900          flows: 2             
+       ad.doubleclick.net                       packets: 373           bytes: 260894        flows: 2             
+       ade.googlesyndication.com                packets: 26            bytes: 7029          flows: 2             
+       ads.rubiconproject.com                   packets: 25            bytes: 10006         flows: 2             
+       adx.g.doubleclick.net                    packets: 70            bytes: 19088         flows: 2             
+       b.scorecardresearch.com                  packets: 24            bytes: 6820          flows: 2             
+       beacon-eu-ams3.rubiconproject.com        packets: 4             bytes: 956           flows: 1             
+       cdn-gl.imrworldwide.com                  packets: 120           bytes: 69236         flows: 3             
+       cdns.gigya.com                           packets: 97            bytes: 67549         flows: 2             
+       cdns.us1.gigya.com                       packets: 53            bytes: 29664         flows: 2             
+       ds-aksb-a.akamaihd.net                   packets: 25            bytes: 7762          flows: 2             
+       geo.moatads.com                          packets: 27            bytes: 7730          flows: 2             
+       googleads.g.doubleclick.net              packets: 50            bytes: 13122         flows: 3             
+       googleads4.g.doubleclick.net             packets: 44            bytes: 9967          flows: 2             
+       gruppoespresso01.webtrekk.net            packets: 19            bytes: 4713          flows: 2             
+       gscounters.us1.gigya.com                 packets: 25            bytes: 9452          flows: 2             
+       it-gmtdmp.mookie1.com                    packets: 15            bytes: 2650          flows: 2             
+       optimized-by.rubiconproject.com          packets: 16            bytes: 4328          flows: 2             
+       pagead2.googlesyndication.com            packets: 157           bytes: 87673         flows: 4             
+       ping.chartbeat.net                       packets: 19            bytes: 5048          flows: 2             
+       px.moatads.com                           packets: 22            bytes: 9068          flows: 2             
+       s0.2mdn.net                              packets: 398           bytes: 282981        flows: 4             
+       secure-assets.rubiconproject.com         packets: 47            bytes: 27665         flows: 2             
+       secure-it.imrworldwide.com               packets: 106           bytes: 25117         flows: 10            
+       securepubads.g.doubleclick.net           packets: 206           bytes: 125705        flows: 2             
+       static.chartbeat.com                     packets: 35            bytes: 16417         flows: 2             
+       tpc.googlesyndication.com                packets: 425           bytes: 283264        flows: 6             
+       www.googletagservices.com                packets: 17            bytes: 4221          flows: 2             
+       z.moatads.com                            packets: 106           bytes: 72849         flows: 2             
+       TOTAL                                    packets: 2577          bytes: 1479874       flows: 75            
 
-### How To Compile nDPI
-
-In order to compile this library do
-
-- ./autogen.sh
-- ./configure
-- make
-
-To run tests do additionally:
-
-- cd tests; ./do.sh
-
-Please note that the pre-requisites for compilation include:
-- GNU tools (autogen, automake, autoconf, libtool)
-- GNU C compiler (gcc)
-
-### How To Add A New Protocol Dissector
-
-The entire procedure of adding new protocols in detail:
-
-1. Add new protocol together with its unique ID to: src/include/ndpi_protocol_ids.h
-2. Create a new protocol in: src/lib/protocols/
-3. Variables to be kept for the duration of the entire flow (as state variables) needs to be placed in: /include/ndpi_structs.h in ndpi_flow_tcp_struct (for TCP only), ndpi_flow_udp_struct (for UDP only), or ndpi_flow_struct (for both).
-4. Add a new entry for the search function for the new protocol in: src/include/ndpi_protocols.h
-5. Choose (do not change anything) a selection bitmask from: src/include/ndpi_define.h
-6. Add a new entry in ndpi_set_protocol_detection_bitmask2 in: src/lib/ndpi_main.c
-7. Set protocol default ports in ndpi_init_protocol_defaults in: src/lib/ndpi_main.c
-8. Add the new protocol file to: src/lib/Makefile.am
-9.  ./autogen.sh
-10. ./configure
-11. make
-12. make check
-
-### How to use nDPI to Block Selected Traffic
-
-You can use nDPI to selectively block selected Internet traffic by embedding it onto an application (remember that nDPI us just a library). Both [ntopng](https://github.com/ntop/ntopng) and [nProbe cento](http://www.ntop.org/products/netflow/nprobe-cento/) can do this.
-
-### DISCLAIMER
-While we do our best to detect network protocols, we cannot guarantee that our software is error free and 100% accurate in protocol detection. Please make sure that you respect the privacy of users and you have proper authorization to listen, capture and inspect network traffic.
-
-### Creating A Source File Tar Ball
-
-If you want to distribute a source tar file of nDPI do:
-
-- make dist
-
-To ensure that a tar file includes all necessary files and to run tests on distribution do:
-
-- make distcheck
-
-[ntopng_logo]: https://camo.githubusercontent.com/0f789abcef232035c05e0d2e82afa3cc3be46485/687474703a2f2f7777772e6e746f702e6f72672f77702d636f6e74656e742f75706c6f6164732f323031312f30382f6e746f706e672d69636f6e2d313530783135302e706e67
-
-[ntop_logo]: https://camo.githubusercontent.com/58e2a1ecfff62d8ecc9d74633bd1013f26e06cba/687474703a2f2f7777772e6e746f702e6f72672f77702d636f6e74656e742f75706c6f6164732f323031352f30352f6e746f702e706e67
+Protocols: (tracking flows/total flows) 
+       DNS:     10 / 38    26.32% 
+       HTTP:     9 / 36    25.00% 
+       SSL:     14 / 14    100.00%
+```
